@@ -15,6 +15,7 @@ import InputNumber from 'primevue/inputnumber'
 import InputText from 'primevue/inputtext'
 import Message from 'primevue/message'
 import Password from 'primevue/password'
+import Popover from 'primevue/popover'
 import Select from 'primevue/select'
 import Tag from 'primevue/tag'
 import Textarea from 'primevue/textarea'
@@ -67,6 +68,7 @@ app.component('InputNumber', InputNumber)
 app.component('InputText', InputText)
 app.component('Message', Message)
 app.component('Password', Password)
+app.component('Popover', Popover)
 app.component('Select', Select)
 app.component('Tag', Tag)
 app.component('Textarea', Textarea)

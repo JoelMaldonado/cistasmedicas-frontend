@@ -1,7 +1,7 @@
 import { io, type Socket } from 'socket.io-client'
 import { readStoredToken } from '@/services/authToken'
 
-const SOCKET_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:3005'
+const SOCKET_URL = import.meta.env.VITE_API_URL
 
 let socket: Socket | null = null
 

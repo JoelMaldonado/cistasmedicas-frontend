@@ -14,7 +14,7 @@ const NAV_ITEMS: Record<string, NavItem[]> = {
     { label: 'Mis citas', to: '/appointments', icon: 'pi pi-calendar' },
   ],
   doctor: [
-    { label: 'Mis citas', to: '/doctor/appointments', icon: 'pi pi-calendar' },
+    { label: 'Mi agenda', to: '/doctor/appointments', icon: 'pi pi-calendar' },
   ],
   admin: [
     { label: 'Médicos', to: '/admin/doctors', icon: 'pi pi-users' },
