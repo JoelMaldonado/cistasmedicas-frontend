@@ -7,13 +7,17 @@ const router = useRouter()
 const authStore = useAuthStore()
 
 function goHome() {
-  router.push(authStore.isAuthenticated ? `/dashboard/${authStore.role}` : '/login')
+  void router.push(authStore.isAuthenticated ? `/dashboard/${authStore.role}` : '/login')
 }
 </script>
 
 <template>
   <div class="not-found">
-    <EmptyState icon="pi pi-compass" title="Página no encontrada" message="La página que buscas no existe o fue movida.">
+    <EmptyState
+      icon="pi pi-compass"
+      title="Página no encontrada"
+      message="La página que buscas no existe o fue movida."
+    >
       <Button label="Volver al inicio" icon="pi pi-home" @click="goHome" />
     </EmptyState>
   </div>

@@ -34,11 +34,28 @@ function handleConfirm() {
 </script>
 
 <template>
-  <Dialog v-model:visible="visible" modal :closable="!loading" :style="{ width: '420px' }" :header="title">
+  <Dialog
+    v-model:visible="visible"
+    modal
+    :closable="!loading"
+    :style="{ width: '420px' }"
+    :header="title"
+  >
     <p class="confirm-dialog__message">{{ message }}</p>
     <template #footer>
-      <Button :label="cancelLabel" text severity="secondary" :disabled="loading" @click="handleCancel" />
-      <Button :label="confirmLabel" :severity="severity" :loading="loading" @click="handleConfirm" />
+      <Button
+        :label="cancelLabel"
+        text
+        severity="secondary"
+        :disabled="loading"
+        @click="handleCancel"
+      />
+      <Button
+        :label="confirmLabel"
+        :severity="severity"
+        :loading="loading"
+        @click="handleConfirm"
+      />
     </template>
   </Dialog>
 </template>

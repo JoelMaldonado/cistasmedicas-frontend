@@ -1,4 +1,4 @@
-import axios from 'axios'
+import axios, { AxiosError } from 'axios'
 import { AUTH_STORAGE_KEY, readStoredToken } from '@/services/authToken'
 
 export const api = axios.create({
@@ -16,7 +16,7 @@ api.interceptors.request.use((config) => {
 // Los 401 de /auth/login o /auth/register son credenciales inválidas, no expiración de sesión.
 api.interceptors.response.use(
   (response) => response,
-  (error) => {
+  (error: AxiosError) => {
     const isAuthEndpoint = error.config?.url?.startsWith('/auth/')
     if (error.response?.status === 401 && !isAuthEndpoint) {
       localStorage.removeItem(AUTH_STORAGE_KEY)

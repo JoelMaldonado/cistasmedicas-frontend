@@ -1,21 +1,21 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from "vue";
-import { useToast } from "primevue/usetoast";
-import type { Appointment } from "@/types/appointment.types";
-import type { DoctorSlot } from "@/types/slot.types";
-import { slotsService } from "@/services/slots.service";
-import { useAppointments } from "@/composables/useAppointments";
-import { getEffectiveStatus } from "@/utils/appointmentStatus";
-import StatusBadge from "@/components/appointments/StatusBadge.vue";
-import ConfirmDialog from "@/components/common/ConfirmDialog.vue";
-import EmptyState from "@/components/common/EmptyState.vue";
+import { computed, onMounted, ref } from 'vue'
+import { useToast } from 'primevue/usetoast'
+import type { Appointment } from '@/types/appointment.types'
+import type { DoctorSlot } from '@/types/slot.types'
+import { slotsService } from '@/services/slots.service'
+import { useAppointments } from '@/composables/useAppointments'
+import { getEffectiveStatus } from '@/utils/appointmentStatus'
+import StatusBadge from '@/components/appointments/StatusBadge.vue'
+import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
+import EmptyState from '@/components/common/EmptyState.vue'
 
 // Debe reflejar la misma ventana/horario que genera el backend (appointments.service.ts)
-const BOOKING_WINDOW_DAYS = 7;
-const WORK_START_HOUR = 8;
-const WORK_END_HOUR = 17;
+const BOOKING_WINDOW_DAYS = 7
+const WORK_START_HOUR = 8
+const WORK_END_HOUR = 17
 
-const toast = useToast();
+const toast = useToast()
 
 const {
   appointments,
@@ -24,253 +24,234 @@ const {
   rejectAppointment,
   cancelAppointment,
   rescheduleAppointment,
-} = useAppointments();
+} = useAppointments()
 
-onMounted(ensureLoaded);
+onMounted(ensureLoaded)
 
 function pad(value: number): string {
-  return value.toString().padStart(2, "0");
+  return value.toString().padStart(2, '0')
 }
 
 function toDateKey(date: Date): string {
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`
 }
 
 const weekDays = computed(() => {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
 
   const days: Array<{
-    date: string;
-    weekday: string;
-    dayNumber: string;
-    isToday: boolean;
-  }> = [];
+    date: string
+    weekday: string
+    dayNumber: string
+    isToday: boolean
+  }> = []
 
   for (let offset = 0; offset <= BOOKING_WINDOW_DAYS; offset++) {
-    const current = new Date(today);
-    current.setDate(today.getDate() + offset);
+    const current = new Date(today)
+    current.setDate(today.getDate() + offset)
 
-    if (current.getDay() === 0) continue; // domingo: sin atención
+    if (current.getDay() === 0) continue // domingo: sin atención
 
     days.push({
       date: toDateKey(current),
-      weekday: current.toLocaleDateString("es-PE", { weekday: "short" }),
-      dayNumber: current.toLocaleDateString("es-PE", {
-        day: "2-digit",
-        month: "short",
+      weekday: current.toLocaleDateString('es-PE', { weekday: 'short' }),
+      dayNumber: current.toLocaleDateString('es-PE', {
+        day: '2-digit',
+        month: 'short',
       }),
       isToday: offset === 0,
-    });
+    })
   }
 
-  return days;
-});
+  return days
+})
 
 const hours = computed(() => {
-  const rows: string[] = [];
+  const rows: string[] = []
   for (let hour = WORK_START_HOUR; hour < WORK_END_HOUR; hour++) {
-    rows.push(`${pad(hour)}:00`);
+    rows.push(`${pad(hour)}:00`)
   }
-  return rows;
-});
+  return rows
+})
 
 // Rechazadas/canceladas liberan el horario: no deben "ocupar" ninguna celda del calendario
 const activeAppointments = computed(() =>
-  appointments.value.filter(
-    (apt) => apt.status !== "rejected" && apt.status !== "cancelled",
-  ),
-);
+  appointments.value.filter((apt) => apt.status !== 'rejected' && apt.status !== 'cancelled'),
+)
 
 const appointmentByCell = computed(() => {
-  const map = new Map<string, Appointment>();
+  const map = new Map<string, Appointment>()
   for (const apt of activeAppointments.value) {
-    map.set(`${apt.date}|${apt.startTime}`, apt);
+    map.set(`${apt.date}|${apt.startTime}`, apt)
   }
-  return map;
-});
+  return map
+})
 
 function cellAppointment(date: string, hour: string): Appointment | null {
-  return appointmentByCell.value.get(`${date}|${hour}`) ?? null;
+  return appointmentByCell.value.get(`${date}|${hour}`) ?? null
 }
 
 function isPastCell(date: string, hour: string): boolean {
-  return new Date(`${date}T${hour}:00`).getTime() < Date.now();
+  return new Date(`${date}T${hour}:00`).getTime() < Date.now()
 }
 
 function formatFullDate(date: string): string {
-  return new Date(`${date}T00:00:00`).toLocaleDateString("es-PE", {
-    weekday: "long",
-    day: "2-digit",
-    month: "long",
-  });
+  return new Date(`${date}T00:00:00`).toLocaleDateString('es-PE', {
+    weekday: 'long',
+    day: '2-digit',
+    month: 'long',
+  })
 }
 
 // "Hoy" / "Mañana" son más fáciles de escanear que la fecha pelada; el resto muestra el día de la semana
 function formatDayGroupLabel(date: string): string {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const tomorrow = new Date(today);
-  tomorrow.setDate(today.getDate() + 1);
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  const tomorrow = new Date(today)
+  tomorrow.setDate(today.getDate() + 1)
 
-  if (date === toDateKey(today)) return "Hoy";
-  if (date === toDateKey(tomorrow)) return "Mañana";
+  if (date === toDateKey(today)) return 'Hoy'
+  if (date === toDateKey(tomorrow)) return 'Mañana'
 
-  return new Date(`${date}T00:00:00`).toLocaleDateString("es-PE", {
-    weekday: "long",
-    day: "2-digit",
-    month: "short",
-  });
+  return new Date(`${date}T00:00:00`).toLocaleDateString('es-PE', {
+    weekday: 'long',
+    day: '2-digit',
+    month: 'short',
+  })
 }
 
 // Popover de la celda: qué cita se seleccionó y en qué botón se hizo click
-const popover = ref();
-const selectedAppointment = ref<Appointment | null>(null);
+const popover = ref()
+const selectedAppointment = ref<Appointment | null>(null)
 
 function openCellPopover(event: Event, appointment: Appointment) {
-  selectedAppointment.value = appointment;
-  popover.value?.toggle(event);
+  selectedAppointment.value = appointment
+  popover.value?.toggle(event)
 }
 
-type ActionType = "confirm" | "reject" | "cancel";
+type ActionType = 'confirm' | 'reject' | 'cancel'
 
-const actionDialog = ref<{ type: ActionType; appointment: Appointment } | null>(
-  null,
-);
-const isProcessingAction = ref(false);
+const actionDialog = ref<{ type: ActionType; appointment: Appointment } | null>(null)
+const isProcessingAction = ref(false)
 
 const ACTION_CONFIG: Record<
   ActionType,
   {
-    title: string;
-    message: (apt: Appointment) => string;
-    confirmLabel: string;
-    severity: "success" | "danger" | "warn";
+    title: string
+    message: (apt: Appointment) => string
+    confirmLabel: string
+    severity: 'success' | 'danger' | 'warn'
   }
 > = {
   confirm: {
-    title: "Confirmar cita",
+    title: 'Confirmar cita',
     message: (apt) => `¿Confirmas la cita con ${apt.patientName}?`,
-    confirmLabel: "Confirmar",
-    severity: "success",
+    confirmLabel: 'Confirmar',
+    severity: 'success',
   },
   reject: {
-    title: "Rechazar cita",
-    message: (apt) =>
-      `¿Seguro que deseas rechazar la cita con ${apt.patientName}?`,
-    confirmLabel: "Rechazar",
-    severity: "danger",
+    title: 'Rechazar cita',
+    message: (apt) => `¿Seguro que deseas rechazar la cita con ${apt.patientName}?`,
+    confirmLabel: 'Rechazar',
+    severity: 'danger',
   },
   cancel: {
-    title: "Cancelar cita",
-    message: (apt) =>
-      `¿Seguro que deseas cancelar la cita con ${apt.patientName}?`,
-    confirmLabel: "Sí, cancelar",
-    severity: "danger",
+    title: 'Cancelar cita',
+    message: (apt) => `¿Seguro que deseas cancelar la cita con ${apt.patientName}?`,
+    confirmLabel: 'Sí, cancelar',
+    severity: 'danger',
   },
-};
+}
 
 const showActionDialog = computed({
   get: () => actionDialog.value !== null,
   set: (value: boolean) => {
-    if (!value) actionDialog.value = null;
+    if (!value) actionDialog.value = null
   },
-});
+})
 
 function openAction(type: ActionType, appointment: Appointment) {
-  popover.value?.hide();
-  actionDialog.value = { type, appointment };
+  popover.value?.hide()
+  actionDialog.value = { type, appointment }
 }
 
 async function handleActionConfirm() {
-  if (!actionDialog.value) return;
-  const { type, appointment } = actionDialog.value;
-  isProcessingAction.value = true;
+  if (!actionDialog.value) return
+  const { type, appointment } = actionDialog.value
+  isProcessingAction.value = true
   try {
-    if (type === "confirm") await confirmAppointment(appointment.id);
-    if (type === "reject") await rejectAppointment(appointment.id);
-    if (type === "cancel") await cancelAppointment(appointment.id);
-    actionDialog.value = null;
+    if (type === 'confirm') await confirmAppointment(appointment.id)
+    if (type === 'reject') await rejectAppointment(appointment.id)
+    if (type === 'cancel') await cancelAppointment(appointment.id)
+    actionDialog.value = null
   } catch (error) {
     toast.add({
-      severity: "error",
-      summary:
-        error instanceof Error ? error.message : "No se pudo procesar la cita.",
+      severity: 'error',
+      summary: error instanceof Error ? error.message : 'No se pudo procesar la cita.',
       life: 4000,
-    });
+    })
   } finally {
-    isProcessingAction.value = false;
+    isProcessingAction.value = false
   }
 }
 
-const showRescheduleDialog = ref(false);
-const appointmentToReschedule = ref<Appointment | null>(null);
-const rescheduleOptions = ref<DoctorSlot[]>([]);
-const selectedNewSlotId = ref<string | null>(null);
-const isRescheduling = ref(false);
+const showRescheduleDialog = ref(false)
+const appointmentToReschedule = ref<Appointment | null>(null)
+const rescheduleOptions = ref<DoctorSlot[]>([])
+const selectedNewSlotId = ref<string | null>(null)
+const isRescheduling = ref(false)
 
 const selectedNewSlot = computed(
-  () =>
-    rescheduleOptions.value.find(
-      (slot) => slot.id === selectedNewSlotId.value,
-    ) ?? null,
-);
+  () => rescheduleOptions.value.find((slot) => slot.id === selectedNewSlotId.value) ?? null,
+)
 
 const rescheduleSlotsByDate = computed(() => {
-  const groups = new Map<string, DoctorSlot[]>();
+  const groups = new Map<string, DoctorSlot[]>()
   for (const slot of rescheduleOptions.value) {
-    const group = groups.get(slot.date) ?? [];
-    group.push(slot);
-    groups.set(slot.date, group);
+    const group = groups.get(slot.date) ?? []
+    group.push(slot)
+    groups.set(slot.date, group)
   }
-  return [...groups.entries()].sort(([a], [b]) => a.localeCompare(b));
-});
+  return [...groups.entries()].sort(([a], [b]) => a.localeCompare(b))
+})
 
 async function openReschedule(appointment: Appointment) {
-  popover.value?.hide();
-  appointmentToReschedule.value = appointment;
-  selectedNewSlotId.value = null;
-  rescheduleOptions.value = [];
-  showRescheduleDialog.value = true;
+  popover.value?.hide()
+  appointmentToReschedule.value = appointment
+  selectedNewSlotId.value = null
+  rescheduleOptions.value = []
+  showRescheduleDialog.value = true
   try {
-    const slots = await slotsService.getByDoctor(appointment.doctorId);
-    rescheduleOptions.value = slots.filter(
-      (slot) => slot.status === "available",
-    );
+    const slots = await slotsService.getByDoctor(appointment.doctorId)
+    rescheduleOptions.value = slots.filter((slot) => slot.status === 'available')
   } catch (error) {
     toast.add({
-      severity: "error",
+      severity: 'error',
       summary:
-        error instanceof Error
-          ? error.message
-          : "No se pudieron cargar los horarios disponibles.",
+        error instanceof Error ? error.message : 'No se pudieron cargar los horarios disponibles.',
       life: 4000,
-    });
+    })
   }
 }
 
 async function handleReschedule() {
-  if (!appointmentToReschedule.value || !selectedNewSlotId.value) return;
-  const slot = rescheduleOptions.value.find(
-    (item) => item.id === selectedNewSlotId.value,
-  );
-  if (!slot) return;
+  if (!appointmentToReschedule.value || !selectedNewSlotId.value) return
+  const slot = rescheduleOptions.value.find((item) => item.id === selectedNewSlotId.value)
+  if (!slot) return
 
-  isRescheduling.value = true;
+  isRescheduling.value = true
   try {
-    await rescheduleAppointment(appointmentToReschedule.value.id, slot);
-    showRescheduleDialog.value = false;
+    await rescheduleAppointment(appointmentToReschedule.value.id, slot)
+    showRescheduleDialog.value = false
   } catch (error) {
     toast.add({
-      severity: "error",
-      summary:
-        error instanceof Error
-          ? error.message
-          : "No se pudo reagendar la cita.",
+      severity: 'error',
+      summary: error instanceof Error ? error.message : 'No se pudo reagendar la cita.',
       life: 4000,
-    });
+    })
   } finally {
-    isRescheduling.value = false;
+    isRescheduling.value = false
   }
 }
 </script>
@@ -283,18 +264,10 @@ async function handleReschedule() {
     </div>
 
     <div class="legend">
-      <span class="legend__item"
-        ><i class="legend__dot legend__dot--pending" />Pendiente</span
-      >
-      <span class="legend__item"
-        ><i class="legend__dot legend__dot--confirmed" />Confirmada</span
-      >
-      <span class="legend__item"
-        ><i class="legend__dot legend__dot--completed" />Completada</span
-      >
-      <span class="legend__item"
-        ><i class="legend__dot legend__dot--free" />Libre</span
-      >
+      <span class="legend__item"><i class="legend__dot legend__dot--pending" />Pendiente</span>
+      <span class="legend__item"><i class="legend__dot legend__dot--confirmed" />Confirmada</span>
+      <span class="legend__item"><i class="legend__dot legend__dot--completed" />Completada</span>
+      <span class="legend__item"><i class="legend__dot legend__dot--free" />Libre</span>
     </div>
 
     <div class="calendar-scroll">
@@ -321,15 +294,10 @@ async function handleReschedule() {
               @click="openCellPopover($event, cellAppointment(day.date, hour)!)"
             >
               <span
-                v-if="
-                  getEffectiveStatus(cellAppointment(day.date, hour)!) ===
-                  'pending'
-                "
+                v-if="getEffectiveStatus(cellAppointment(day.date, hour)!) === 'pending'"
                 class="cell__pulse"
               />
-              <span class="cell__patient">{{
-                cellAppointment(day.date, hour)!.patientName
-              }}</span>
+              <span class="cell__patient">{{ cellAppointment(day.date, hour)!.patientName }}</span>
             </button>
             <div
               v-else
@@ -347,8 +315,7 @@ async function handleReschedule() {
           {{ selectedAppointment.patientName }}
         </p>
         <p class="popover-content__meta">
-          {{ formatFullDate(selectedAppointment.date) }} ·
-          {{ selectedAppointment.startTime }} -
+          {{ formatFullDate(selectedAppointment.date) }} · {{ selectedAppointment.startTime }} -
           {{ selectedAppointment.endTime }}
         </p>
         <p v-if="selectedAppointment.reason" class="popover-content__reason">
@@ -357,9 +324,7 @@ async function handleReschedule() {
         <StatusBadge :status="getEffectiveStatus(selectedAppointment)" />
 
         <div class="popover-content__actions">
-          <template
-            v-if="getEffectiveStatus(selectedAppointment) === 'pending'"
-          >
+          <template v-if="getEffectiveStatus(selectedAppointment) === 'pending'">
             <Button
               label="Aceptar"
               size="small"
@@ -374,9 +339,7 @@ async function handleReschedule() {
               @click="openAction('reject', selectedAppointment)"
             />
           </template>
-          <template
-            v-else-if="getEffectiveStatus(selectedAppointment) === 'confirmed'"
-          >
+          <template v-else-if="getEffectiveStatus(selectedAppointment) === 'confirmed'">
             <Button
               label="Reagendar"
               size="small"
@@ -400,9 +363,7 @@ async function handleReschedule() {
       v-if="actionDialog"
       v-model:visible="showActionDialog"
       :title="ACTION_CONFIG[actionDialog.type].title"
-      :message="
-        ACTION_CONFIG[actionDialog.type].message(actionDialog.appointment)
-      "
+      :message="ACTION_CONFIG[actionDialog.type].message(actionDialog.appointment)"
       :confirm-label="ACTION_CONFIG[actionDialog.type].confirmLabel"
       :severity="ACTION_CONFIG[actionDialog.type].severity"
       :loading="isProcessingAction"
@@ -428,11 +389,7 @@ async function handleReschedule() {
         message="No hay horarios libres por el momento."
       />
       <div v-else class="reschedule-slots">
-        <div
-          v-for="[date, daySlots] in rescheduleSlotsByDate"
-          :key="date"
-          class="day-block"
-        >
+        <div v-for="[date, daySlots] in rescheduleSlotsByDate" :key="date" class="day-block">
           <p class="day-block__date">{{ formatDayGroupLabel(date) }}</p>
           <div class="slot-grid">
             <Button
@@ -451,19 +408,13 @@ async function handleReschedule() {
         <i class="pi pi-check-circle" />
         Nuevo horario:
         <strong
-          >{{ formatFullDate(selectedNewSlot.date) }} ·
-          {{ selectedNewSlot.startTime }} -
+          >{{ formatFullDate(selectedNewSlot.date) }} · {{ selectedNewSlot.startTime }} -
           {{ selectedNewSlot.endTime }}</strong
         >
       </p>
 
       <template #footer>
-        <Button
-          label="Cancelar"
-          text
-          severity="secondary"
-          @click="showRescheduleDialog = false"
-        />
+        <Button label="Cancelar" text severity="secondary" @click="showRescheduleDialog = false" />
         <Button
           label="Confirmar"
           :disabled="!selectedNewSlotId"

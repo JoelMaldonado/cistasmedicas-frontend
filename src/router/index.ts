@@ -41,14 +41,19 @@ const routes: RouteRecordRaw[] = [
     path: '/appointments',
     component: DashboardLayout,
     meta: { requiresAuth: true, roles: ['patient'] },
-    children: [{ path: '', component: () => import('@/views/appointments/MyAppointmentsView.vue') }],
+    children: [
+      { path: '', component: () => import('@/views/appointments/MyAppointmentsView.vue') },
+    ],
   },
   {
     path: '/doctor',
     component: DashboardLayout,
     meta: { requiresAuth: true, roles: ['doctor'] },
     children: [
-      { path: 'appointments', component: () => import('@/views/appointments/DoctorAppointmentsView.vue') },
+      {
+        path: 'appointments',
+        component: () => import('@/views/appointments/DoctorAppointmentsView.vue'),
+      },
     ],
   },
   {

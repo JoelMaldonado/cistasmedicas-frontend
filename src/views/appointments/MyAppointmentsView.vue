@@ -11,13 +11,14 @@ import StatusBadge from '@/components/appointments/StatusBadge.vue'
 import EmptyState from '@/components/common/EmptyState.vue'
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
 
-const { appointments, isLoading, ensureLoaded, cancelAppointment, requestAppointment } = useAppointments()
+const { appointments, isLoading, ensureLoaded, cancelAppointment, requestAppointment } =
+  useAppointments()
 const doctorsStore = useDoctorsStore()
 const toast = useToast()
 
 onMounted(() => {
-  ensureLoaded()
-  doctorsStore.ensureLoaded()
+  void ensureLoaded()
+  void doctorsStore.ensureLoaded()
 })
 
 function canCancel(appointment: Appointment): boolean {
@@ -62,8 +63,12 @@ const reason = ref('')
 const isSubmitting = ref(false)
 
 const doctors = computed(() => doctorsStore.doctors)
-const selectedDoctor = computed(() => doctors.value.find((doctor) => doctor.id === selectedDoctorId.value) ?? null)
-const selectedSlot = computed(() => slots.value.find((slot) => slot.id === selectedSlotId.value) ?? null)
+const selectedDoctor = computed(
+  () => doctors.value.find((doctor) => doctor.id === selectedDoctorId.value) ?? null,
+)
+const selectedSlot = computed(
+  () => slots.value.find((slot) => slot.id === selectedSlotId.value) ?? null,
+)
 
 const slotsByDate = computed(() => {
   const groups = new Map<string, DoctorSlot[]>()
@@ -189,7 +194,12 @@ async function handleCreateAppointment() {
       @confirm="handleCancel"
     />
 
-    <Dialog v-model:visible="showCreateDialog" modal header="Crear cita" :style="{ width: '480px' }">
+    <Dialog
+      v-model:visible="showCreateDialog"
+      modal
+      header="Crear cita"
+      :style="{ width: '480px' }"
+    >
       <div class="field">
         <label for="doctor">Médico</label>
         <Select
@@ -234,7 +244,13 @@ async function handleCreateAppointment() {
 
       <div v-if="selectedSlotId" class="field">
         <label for="reason">Motivo de la consulta (opcional)</label>
-        <Textarea id="reason" v-model="reason" rows="2" fluid placeholder="Describe brevemente el motivo de tu consulta" />
+        <Textarea
+          id="reason"
+          v-model="reason"
+          rows="2"
+          fluid
+          placeholder="Describe brevemente el motivo de tu consulta"
+        />
       </div>
 
       <template #footer>

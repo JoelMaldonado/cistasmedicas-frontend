@@ -23,7 +23,10 @@ const passwordRequirements = computed(() => [
   { label: 'Al menos una mayúscula', met: /[A-Z]/.test(form.password) },
   { label: 'Al menos un número', met: /\d/.test(form.password) },
   { label: 'Al menos un carácter especial', met: /[^A-Za-z0-9]/.test(form.password) },
-  { label: 'Las contraseñas coinciden', met: !!form.password && form.password === form.confirmPassword },
+  {
+    label: 'Las contraseñas coinciden',
+    met: !!form.password && form.password === form.confirmPassword,
+  },
 ])
 
 const isPasswordValid = computed(() => passwordRequirements.value.every((req) => req.met))
@@ -49,7 +52,10 @@ async function handleSubmit() {
   try {
     await register({ fullName: form.fullName, email: form.email, password: form.password })
   } catch (error) {
-    submitError.value = error instanceof Error ? error.message : 'No se pudo completar el registro. Intenta nuevamente.'
+    submitError.value =
+      error instanceof Error
+        ? error.message
+        : 'No se pudo completar el registro. Intenta nuevamente.'
   }
 }
 </script>
@@ -67,13 +73,23 @@ async function handleSubmit() {
       <form class="register-form" @submit.prevent="handleSubmit">
         <div class="field">
           <label for="fullName">Nombre completo</label>
-          <InputText id="fullName" v-model="form.fullName" placeholder="Nombre y apellido" :invalid="!!errors.fullName" />
+          <InputText
+            id="fullName"
+            v-model="form.fullName"
+            placeholder="Nombre y apellido"
+            :invalid="!!errors.fullName"
+          />
           <small v-if="errors.fullName" class="field__error">{{ errors.fullName }}</small>
         </div>
 
         <div class="field">
           <label for="email">Correo electrónico</label>
-          <InputText id="email" v-model="form.email" placeholder="correo@ejemplo.com" :invalid="!!errors.email" />
+          <InputText
+            id="email"
+            v-model="form.email"
+            placeholder="correo@ejemplo.com"
+            :invalid="!!errors.email"
+          />
           <small v-if="errors.email" class="field__error">{{ errors.email }}</small>
         </div>
 
@@ -115,7 +131,13 @@ async function handleSubmit() {
 
         <Message v-if="submitError" severity="error" :closable="false">{{ submitError }}</Message>
 
-        <Button type="submit" label="Crear cuenta" icon="pi pi-user-plus" :loading="isLoading" class="register-form__submit" />
+        <Button
+          type="submit"
+          label="Crear cuenta"
+          icon="pi pi-user-plus"
+          :loading="isLoading"
+          class="register-form__submit"
+        />
 
         <p class="register-form__login">
           ¿Ya tienes cuenta? <router-link to="/login">Inicia sesión</router-link>

@@ -20,7 +20,12 @@ function viewDetail(doctor: Doctor) {
 }
 
 function handleEdit() {
-  toast.add({ severity: 'info', summary: 'Próximamente', detail: 'La edición de médicos estará disponible pronto.', life: 3000 })
+  toast.add({
+    severity: 'info',
+    summary: 'Próximamente',
+    detail: 'La edición de médicos estará disponible pronto.',
+    life: 3000,
+  })
 }
 </script>
 
@@ -31,10 +36,20 @@ function handleEdit() {
         <h1>Médicos</h1>
         <p>Administra los médicos registrados en el sistema.</p>
       </div>
-      <Button label="Nuevo médico" icon="pi pi-user-plus" @click="router.push('/admin/doctors/create')" />
+      <Button
+        label="Nuevo médico"
+        icon="pi pi-user-plus"
+        @click="router.push('/admin/doctors/create')"
+      />
     </div>
 
-    <DataTable :value="doctorsStore.doctors" :loading="doctorsStore.isLoading" paginator :rows="8" data-key="id">
+    <DataTable
+      :value="doctorsStore.doctors"
+      :loading="doctorsStore.isLoading"
+      paginator
+      :rows="8"
+      data-key="id"
+    >
       <Column field="fullName" header="Nombre" />
       <Column field="email" header="Correo" />
       <Column field="specialty" header="Especialidad" />
@@ -48,7 +63,12 @@ function handleEdit() {
       </Column>
     </DataTable>
 
-    <Dialog v-model:visible="showDetail" modal header="Detalle del médico" :style="{ width: '380px' }">
+    <Dialog
+      v-model:visible="showDetail"
+      modal
+      header="Detalle del médico"
+      :style="{ width: '380px' }"
+    >
       <div v-if="selectedDoctor" class="doctor-detail">
         <p><strong>Nombre:</strong> {{ selectedDoctor.fullName }}</p>
         <p><strong>Correo:</strong> {{ selectedDoctor.email }}</p>

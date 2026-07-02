@@ -49,7 +49,10 @@ export const useAppointmentsStore = defineStore('appointments', () => {
   // El endpoint de creación no devuelve el médico/paciente/horario anidados,
   // así que la fila se arma localmente con los datos que la vista ya conocía.
   async function createAppointment(payload: CreateAppointmentInput) {
-    const created = await appointmentsService.create({ slotId: payload.slotId, reason: payload.reason })
+    const created = await appointmentsService.create({
+      slotId: payload.slotId,
+      reason: payload.reason,
+    })
     const appointment: Appointment = {
       id: created.id,
       doctorId: payload.doctorId,

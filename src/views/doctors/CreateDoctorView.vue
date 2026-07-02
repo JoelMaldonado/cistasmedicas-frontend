@@ -4,7 +4,14 @@ import { useRouter } from 'vue-router'
 import { useToast } from 'primevue/usetoast'
 import { useDoctorsStore } from '@/stores/doctors.store'
 
-const SPECIALTIES = ['Cardiología', 'Pediatría', 'Dermatología', 'Medicina General', 'Ginecología', 'Traumatología']
+const SPECIALTIES = [
+  'Cardiología',
+  'Pediatría',
+  'Dermatología',
+  'Medicina General',
+  'Ginecología',
+  'Traumatología',
+]
 
 const doctorsStore = useDoctorsStore()
 const router = useRouter()
@@ -30,7 +37,8 @@ const submitError = ref('')
 function validate(): boolean {
   errors.fullName = form.fullName ? '' : 'El nombre completo es obligatorio.'
   errors.email = /^\S+@\S+\.\S+$/.test(form.email) ? '' : 'Ingresa un correo válido.'
-  errors.password = form.password.length >= 6 ? '' : 'La contraseña debe tener al menos 6 caracteres.'
+  errors.password =
+    form.password.length >= 6 ? '' : 'La contraseña debe tener al menos 6 caracteres.'
   errors.specialty = form.specialty ? '' : 'Selecciona una especialidad.'
 
   return Object.values(errors).every((error) => !error)
@@ -43,10 +51,16 @@ async function handleSubmit() {
   isSubmitting.value = true
   try {
     await doctorsStore.createDoctor({ ...form })
-    toast.add({ severity: 'success', summary: 'Médico registrado', detail: `${form.fullName} fue dado de alta correctamente.`, life: 4000 })
-    router.push('/admin/doctors')
+    toast.add({
+      severity: 'success',
+      summary: 'Médico registrado',
+      detail: `${form.fullName} fue dado de alta correctamente.`,
+      life: 4000,
+    })
+    void router.push('/admin/doctors')
   } catch (error) {
-    submitError.value = error instanceof Error ? error.message : 'No se pudo registrar el médico. Intenta nuevamente.'
+    submitError.value =
+      error instanceof Error ? error.message : 'No se pudo registrar el médico. Intenta nuevamente.'
   } finally {
     isSubmitting.value = false
   }
@@ -56,7 +70,12 @@ async function handleSubmit() {
 <template>
   <div class="page">
     <div class="page-header">
-      <Button icon="pi pi-arrow-left" text label="Volver a médicos" @click="router.push('/admin/doctors')" />
+      <Button
+        icon="pi pi-arrow-left"
+        text
+        label="Volver a médicos"
+        @click="router.push('/admin/doctors')"
+      />
       <h1>Nuevo médico</h1>
       <p>Registra un nuevo médico en el sistema.</p>
     </div>
@@ -66,31 +85,61 @@ async function handleSubmit() {
         <form class="doctor-form" @submit.prevent="handleSubmit">
           <div class="field">
             <label for="fullName">Nombre completo</label>
-            <InputText id="fullName" v-model="form.fullName" placeholder="Dr(a). Nombre Apellido" :invalid="!!errors.fullName" />
+            <InputText
+              id="fullName"
+              v-model="form.fullName"
+              placeholder="Dr(a). Nombre Apellido"
+              :invalid="!!errors.fullName"
+            />
             <small v-if="errors.fullName" class="field__error">{{ errors.fullName }}</small>
           </div>
 
           <div class="field">
             <label for="email">Correo electrónico</label>
-            <InputText id="email" v-model="form.email" placeholder="correo@citasmedicas.com" :invalid="!!errors.email" />
+            <InputText
+              id="email"
+              v-model="form.email"
+              placeholder="correo@citasmedicas.com"
+              :invalid="!!errors.email"
+            />
             <small v-if="errors.email" class="field__error">{{ errors.email }}</small>
           </div>
 
           <div class="field">
             <label for="password">Contraseña temporal</label>
-            <Password id="password" v-model="form.password" :feedback="false" toggle-mask :invalid="!!errors.password" fluid />
+            <Password
+              id="password"
+              v-model="form.password"
+              :feedback="false"
+              toggle-mask
+              :invalid="!!errors.password"
+              fluid
+            />
             <small v-if="errors.password" class="field__error">{{ errors.password }}</small>
           </div>
 
           <div class="field">
             <label for="specialty">Especialidad</label>
-            <Select id="specialty" v-model="form.specialty" :options="SPECIALTIES" placeholder="Selecciona una especialidad" :invalid="!!errors.specialty" fluid />
+            <Select
+              id="specialty"
+              v-model="form.specialty"
+              :options="SPECIALTIES"
+              placeholder="Selecciona una especialidad"
+              :invalid="!!errors.specialty"
+              fluid
+            />
             <small v-if="errors.specialty" class="field__error">{{ errors.specialty }}</small>
           </div>
 
           <Message v-if="submitError" severity="error" :closable="false">{{ submitError }}</Message>
 
-          <Button type="submit" label="Registrar médico" icon="pi pi-user-plus" :loading="isSubmitting" class="doctor-form__submit" />
+          <Button
+            type="submit"
+            label="Registrar médico"
+            icon="pi pi-user-plus"
+            :loading="isSubmitting"
+            class="doctor-form__submit"
+          />
         </form>
       </template>
     </Card>

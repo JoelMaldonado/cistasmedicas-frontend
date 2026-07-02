@@ -44,7 +44,9 @@ export const appointmentsService = {
     }
   },
 
-  async create(payload: CreateAppointmentPayload): Promise<{ id: string; status: AppointmentStatus }> {
+  async create(
+    payload: CreateAppointmentPayload,
+  ): Promise<{ id: string; status: AppointmentStatus }> {
     try {
       const { data } = await api.post<ApiAppointment>('/appointments', payload)
       return { id: data.id, status: data.status }

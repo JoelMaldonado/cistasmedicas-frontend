@@ -38,7 +38,9 @@ export const authService = {
       const { data } = await api.post<AuthApiResponse>('/auth/register', payload)
       return { user: data.user, token: data.access_token }
     } catch (error) {
-      throw new Error(extractErrorMessage(error, 'No se pudo completar el registro. Intenta nuevamente.'))
+      throw new Error(
+        extractErrorMessage(error, 'No se pudo completar el registro. Intenta nuevamente.'),
+      )
     }
   },
 }

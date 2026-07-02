@@ -31,13 +31,7 @@ const initials = computed(() => {
         <span class="topbar__name">{{ user?.fullName }}</span>
         <span class="topbar__role">{{ roleLabel }}</span>
       </div>
-      <Button
-        icon="pi pi-sign-out"
-        label="Salir"
-        text
-        severity="secondary"
-        @click="logout"
-      />
+      <Button icon="pi pi-sign-out" label="Salir" text severity="secondary" @click="logout" />
     </div>
   </header>
 </template>

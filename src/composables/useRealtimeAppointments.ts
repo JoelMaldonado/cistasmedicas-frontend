@@ -40,7 +40,8 @@ export function useRealtimeAppointments() {
       detail: `${payload.patientName} solicitó una cita${payload.reason ? `: ${payload.reason}` : '.'}`,
       life: 6000,
     })
-    store.fetchAll()
+    // El toast ya avisó; si el refresco de la lista falla, se reintentará con la próxima notificación.
+    store.fetchAll().catch(() => {})
   }
 
   function handleStatusChanged(payload: AppointmentStatusChangedPayload) {
@@ -49,7 +50,7 @@ export function useRealtimeAppointments() {
       summary: `Tu cita fue ${STATUS_LABELS[payload.status]}`,
       life: 6000,
     })
-    store.fetchAll()
+    store.fetchAll().catch(() => {})
   }
 
   function handleRescheduled(payload: AppointmentRescheduledPayload) {
@@ -59,7 +60,7 @@ export function useRealtimeAppointments() {
       detail: `Nuevo horario: ${payload.date} · ${payload.startTime} - ${payload.endTime}`,
       life: 6000,
     })
-    store.fetchAll()
+    store.fetchAll().catch(() => {})
   }
 
   const socket = connectSocket()

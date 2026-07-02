@@ -1,6 +1,10 @@
 import { computed } from 'vue'
 import { useToast } from 'primevue/usetoast'
-import { useAppointmentsStore, type CreateAppointmentInput, type RescheduleSlotInput } from '@/stores/appointments.store'
+import {
+  useAppointmentsStore,
+  type CreateAppointmentInput,
+  type RescheduleSlotInput,
+} from '@/stores/appointments.store'
 import { useAuthStore } from '@/stores/auth.store'
 
 function sortKey(date: string, time: string): string {
@@ -21,7 +25,9 @@ export function useAppointments() {
 
   const upcomingAppointments = computed(() =>
     [...store.appointments]
-      .filter((apt) => (apt.status === 'pending' || apt.status === 'confirmed') && apt.date >= todayKey)
+      .filter(
+        (apt) => (apt.status === 'pending' || apt.status === 'confirmed') && apt.date >= todayKey,
+      )
       .sort((a, b) => sortKey(a.date, a.startTime).localeCompare(sortKey(b.date, b.startTime))),
   )
 
@@ -40,7 +46,12 @@ export function useAppointments() {
       ...payload,
       patientName: authStore.user?.fullName ?? '',
     })
-    toast.add({ severity: 'success', summary: 'Cita solicitada', detail: 'Tu cita quedó pendiente de confirmación.', life: 4000 })
+    toast.add({
+      severity: 'success',
+      summary: 'Cita solicitada',
+      detail: 'Tu cita quedó pendiente de confirmación.',
+      life: 4000,
+    })
     return appointment
   }
 

@@ -10,15 +10,9 @@ interface NavItem {
 }
 
 const NAV_ITEMS: Record<string, NavItem[]> = {
-  patient: [
-    { label: 'Mis citas', to: '/appointments', icon: 'pi pi-calendar' },
-  ],
-  doctor: [
-    { label: 'Mi agenda', to: '/doctor/appointments', icon: 'pi pi-calendar' },
-  ],
-  admin: [
-    { label: 'Médicos', to: '/admin/doctors', icon: 'pi pi-users' },
-  ],
+  patient: [{ label: 'Mis citas', to: '/appointments', icon: 'pi pi-calendar' }],
+  doctor: [{ label: 'Mi agenda', to: '/doctor/appointments', icon: 'pi pi-calendar' }],
+  admin: [{ label: 'Médicos', to: '/admin/doctors', icon: 'pi pi-users' }],
 }
 
 const authStore = useAuthStore()
@@ -92,7 +86,9 @@ function isActive(to: string): boolean {
   color: #475569;
   text-decoration: none;
   font-size: 0.925rem;
-  transition: background-color 0.15s ease, color 0.15s ease;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease;
 }
 
 .sidebar__item:hover {
