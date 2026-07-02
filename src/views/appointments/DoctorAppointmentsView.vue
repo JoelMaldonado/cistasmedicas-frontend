@@ -8,6 +8,7 @@ import { useAppointments } from '@/composables/useAppointments'
 import { getEffectiveStatus } from '@/utils/appointmentStatus'
 import StatusBadge from '@/components/appointments/StatusBadge.vue'
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
+import EmptyState from '@/components/common/EmptyState.vue'
 
 // Debe reflejar la misma ventana/horario que genera el backend (appointments.service.ts)
 const BOOKING_WINDOW_DAYS = 7
@@ -89,6 +90,23 @@ function formatFullDate(date: string): string {
   })
 }
 
+// "Hoy" / "Mañana" son más fáciles de escanear que la fecha pelada; el resto muestra el día de la semana
+function formatDayGroupLabel(date: string): string {
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  const tomorrow = new Date(today)
+  tomorrow.setDate(today.getDate() + 1)
+
+  if (date === toDateKey(today)) return 'Hoy'
+  if (date === toDateKey(tomorrow)) return 'Mañana'
+
+  return new Date(`${date}T00:00:00`).toLocaleDateString('es-PE', {
+    weekday: 'long',
+    day: '2-digit',
+    month: 'short',
+  })
+}
+
 // Popover de la celda: qué cita se seleccionó y en qué botón se hizo click
 const popover = ref()
 const selectedAppointment = ref<Appointment | null>(null)
@@ -161,6 +179,20 @@ const appointmentToReschedule = ref<Appointment | null>(null)
 const rescheduleOptions = ref<DoctorSlot[]>([])
 const selectedNewSlotId = ref<string | null>(null)
 const isRescheduling = ref(false)
+
+const selectedNewSlot = computed(() =>
+  rescheduleOptions.value.find((slot) => slot.id === selectedNewSlotId.value) ?? null,
+)
+
+const rescheduleSlotsByDate = computed(() => {
+  const groups = new Map<string, DoctorSlot[]>()
+  for (const slot of rescheduleOptions.value) {
+    const group = groups.get(slot.date) ?? []
+    group.push(slot)
+    groups.set(slot.date, group)
+  }
+  return [...groups.entries()].sort(([a], [b]) => a.localeCompare(b))
+})
 
 async function openReschedule(appointment: Appointment) {
   popover.value?.hide()
@@ -276,18 +308,36 @@ async function handleReschedule() {
       @cancel="actionDialog = null"
     />
 
-    <Dialog v-model:visible="showRescheduleDialog" modal header="Reagendar cita" :style="{ width: '420px' }">
+    <Dialog v-model:visible="showRescheduleDialog" modal header="Reagendar cita" :style="{ width: '460px' }">
       <p class="reschedule-info">Selecciona un nuevo horario disponible para {{ appointmentToReschedule?.patientName }}.</p>
-      <Select
-        v-model="selectedNewSlotId"
-        :options="rescheduleOptions"
-        option-label="date"
-        option-value="id"
-        placeholder="Selecciona un horario"
-        fluid
-      >
-        <template #option="{ option }">{{ option.date }} · {{ option.startTime }} - {{ option.endTime }}</template>
-      </Select>
+
+      <EmptyState
+        v-if="rescheduleSlotsByDate.length === 0"
+        icon="pi pi-calendar-times"
+        title="Sin horarios disponibles"
+        message="No hay horarios libres por el momento."
+      />
+      <div v-else class="reschedule-slots">
+        <div v-for="[date, daySlots] in rescheduleSlotsByDate" :key="date" class="day-block">
+          <p class="day-block__date">{{ formatDayGroupLabel(date) }}</p>
+          <div class="slot-grid">
+            <Button
+              v-for="slot in daySlots"
+              :key="slot.id"
+              :label="slot.startTime"
+              size="small"
+              :outlined="selectedNewSlotId !== slot.id"
+              @click="selectedNewSlotId = slot.id"
+            />
+          </div>
+        </div>
+      </div>
+
+      <p v-if="selectedNewSlot" class="reschedule-selection">
+        <i class="pi pi-check-circle" />
+        Nuevo horario: <strong>{{ formatFullDate(selectedNewSlot.date) }} · {{ selectedNewSlot.startTime }} - {{ selectedNewSlot.endTime }}</strong>
+      </p>
+
       <template #footer>
         <Button label="Cancelar" text severity="secondary" @click="showRescheduleDialog = false" />
         <Button label="Confirmar" :disabled="!selectedNewSlotId" :loading="isRescheduling" @click="handleReschedule" />
@@ -504,5 +554,48 @@ async function handleReschedule() {
 .reschedule-info {
   color: #64748b;
   margin: 0 0 1rem;
+}
+
+.reschedule-slots {
+  max-height: 260px;
+  overflow-y: auto;
+  padding-right: 0.25rem;
+  margin-bottom: 1rem;
+}
+
+.day-block {
+  margin-bottom: 0.85rem;
+}
+
+.day-block__date {
+  margin: 0 0 0.4rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #475569;
+  text-transform: capitalize;
+}
+
+.slot-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.reschedule-selection {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0.6rem 0.75rem;
+  background: #ecfdf5;
+  border: 1px solid #6ee7b7;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  color: #065f46;
+  text-transform: capitalize;
+}
+
+.reschedule-selection i {
+  color: #059669;
 }
 </style>
